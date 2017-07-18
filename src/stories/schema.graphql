@@ -1,0 +1,16 @@
+type RuleNode {
+    term:   String
+    regex:  String
+    max:    Int
+    min:    Int
+    and:    [RuleNode]
+    or:     [RuleNode]
+}
+type RuleRoot {
+    and:    [RuleNode]
+    not:    [RuleNode]
+}
+
+# This is required by buildASTSchema
+type Query { anything: ID }
+

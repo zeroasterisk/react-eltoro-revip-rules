@@ -1,21 +1,17 @@
 import React from 'react';
-import { storiesOf, action } from '@kadira/storybook';
-import Button from '../index';
+import { storiesOf, action } from '@storybook/react';
+import AutoForm from 'uniforms-bootstrap4/AutoForm';
+import RevIpRules from '../index';
 
-storiesOf('Button', module)
+// fancy GraphQLBridge and configuation for testing
+//   self-referential stuff
+import schema from './schema';
+
+storiesOf('RevIpRules', module)
+  .add('plain autoform', () => (
+    <AutoForm schema={schema} onSubmit={action('submitted')} />
+  ))
   .add('default view', () => (
-    <Button onClick={ action('button clicked') }>Hello</Button>
+    <RevIpRules onChange={ action('RevIpRules changed') } />
   ))
-  .add('some emojies as the text', () => (
-    <Button>😀 😎 👍 💯</Button>
-  ))
-  .add('custom styles', () => {
-    const style = {
-      fontSize: 20,
-      textTransform: 'uppercase',
-      color: '#FF8833',
-    };
-    return (
-      <Button style={ style }>Hello</Button>
-    );
-  });
+;
