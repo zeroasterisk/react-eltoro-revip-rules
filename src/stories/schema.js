@@ -10,10 +10,10 @@ import { buildASTSchema, parse } from 'graphql';
 // https://github.com/Swydo/meteor-graphql <-- must update import and webpack to support this
 import schemaGraphQl from './schema.graphql';
 
-const schemaAST = buildASTSchema(schemaGraphQl).getType('RuleRoot');
+const schemaAST = buildASTSchema(schemaGraphQl).getType('Bucket');
 
 // build settings and details for supported fields
-const schemaData = {
+const schemaRuleData = {
   term: {label: 'Term'},
   regex: {label: 'Regex'},
   max: {label: 'max'},
@@ -25,15 +25,34 @@ const schemaData = {
 };
 
 // handle nested nodes
-const assignPrefix = (prefix, i) => {
-  Object.keys(schemaData).forEach((key, j) => {
+const assignRulePrefix = (prefix, i) => {
+  Object.keys(schemaRuleData).forEach((key, j) => {
     const newKey = `${prefix}.\$.${key}`;
-    schemaData[newKey] = schemaData[key];
+    schemaRuleData[newKey] = schemaRuleData[key];
   });
 };
-['and', 'or', 'not'].forEach(assignPrefix);
-['and', 'or', 'not'].forEach(assignPrefix);
-['and', 'or', 'not'].forEach(assignPrefix);
+['and', 'or'].forEach(assignRulePrefix);
+['and', 'or'].forEach(assignRulePrefix);
+['and', 'or'].forEach(assignRulePrefix);
+
+const schemaData = {
+  name: { label: 'Name' },
+  conf: { label: 'Conf' },
+  'conf.revIpRules': { label: 'Conf for Rev IP' },
+  'conf.revIpRules.rule': { label: 'Rules for Rev IP' },
+  'conf.revIpRules.rule.and': { label: 'Rules Include' },
+  'conf.revIpRules.rule.not': { label: 'Rules Exclude' },
+  'conf.revIpRules.rule.not.or': { label: 'Rules Exclude Any of These' },
+};
+const assignPrefix = (prefix, i) => {
+  Object.keys(schemaRuleData).forEach((key, j) => {
+    const newKey = `${prefix}.\$.${key}`;
+    schemaData[newKey] = schemaRuleData[key];
+  });
+};
+['conf.revIpRules.rule.and', 'conf.revIpRules.rule.not.or'].forEach(assignPrefix);
+console.log(schemaData);
+
 
 // build a validator
 const schemaValidator = model => {

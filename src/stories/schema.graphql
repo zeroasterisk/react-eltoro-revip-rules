@@ -1,4 +1,5 @@
 type RuleNode {
+    use:    String
     term:   String
     regex:  String
     max:    Int
@@ -6,9 +7,22 @@ type RuleNode {
     and:    [RuleNode]
     or:     [RuleNode]
 }
+type RuleNotRoot {
+    or:    [RuleNode]
+}
 type RuleRoot {
     and:    [RuleNode]
-    not:    [RuleNode]
+    not:    RuleNotRoot
+}
+type BucketConfRev {
+    rule: RuleRoot
+}
+type BucketConf {
+    revIpRules: BucketConfRev
+}
+type Bucket {
+    name: String
+    conf: BucketConf
 }
 
 # This is required by buildASTSchema

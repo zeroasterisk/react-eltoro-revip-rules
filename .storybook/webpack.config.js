@@ -2,6 +2,13 @@
 const path = require('path');
 
 module.exports = {
+  resolve: {
+    alias: {
+      handlebars: 'handlebars/dist/handlebars.min.js',
+      'meteor/check': 'uniforms/SimpleSchemaBridge.js',
+      'meteor/aldeed:simple-schema': 'uniforms/SimpleSchemaBridge.js',
+    },
+  },
   module: {
     rules: [
       {
