@@ -14,7 +14,7 @@ import schema from './schema';
 
 
 const mock_bucket_1 = {
-  name: 'mock bucket',
+  name: 'mock bucket 1',
   conf: {
     revIpRules: {
       rule: {
@@ -42,38 +42,57 @@ const mock_bucket_1 = {
     },
   },
 };
+const mock_bucket_2 = {
+  name: 'mock bucket 2',
+  conf: {
+    revIpRules: {
+      rule: {
+        and: [
+          { or: [
+            { term: 'http://example.com/one_of_a/maybe', max: 10, min: 1 },
+            { useRegex: true, regex: 'examples?\.com' },
+          ] },
+        ],
+      },
+    },
+  },
+};
+const mock_bucket_3 = {
+  name: 'mock bucket 3',
+  conf: {
+    revIpRules: {
+      rule: {}
+    },
+  },
+};
 
 storiesOf('RevIpRules', module)
-  .add('mock data', () => (
-    <AutoForm
-      grid={3}
-      schema={schema}
-      onSubmit={action('submitted')}
-      model={mock_bucket_1}
-    >
+  .add('mock data 1', () => (
+    <AutoForm grid={3} schema={schema} onSubmit={action('submitted')} model={mock_bucket_1}>
+      <RevIpRules name="conf.revIpRules.rule" />
+      <ErrorsField />
+      <SubmitField />
+    </AutoForm>
+  ))
+  .add('mock data 2', () => (
+    <AutoForm grid={3} schema={schema} onSubmit={action('submitted')} model={mock_bucket_2}>
+      <RevIpRules name="conf.revIpRules.rule" />
+      <ErrorsField />
+      <SubmitField />
+    </AutoForm>
+  ))
+  .add('mock data 3', () => (
+    <AutoForm grid={3} schema={schema} onSubmit={action('submitted')} model={mock_bucket_3}>
       <RevIpRules name="conf.revIpRules.rule" />
       <ErrorsField />
       <SubmitField />
     </AutoForm>
   ))
   .add('no data', () => (
-    <AutoForm
-      grid={3}
-      schema={schema}
-      onSubmit={action('submitted')}
-      model={{}}
-    >
+    <AutoForm grid={3} schema={schema} onSubmit={action('submitted')} model={{}}>
       <RevIpRules name="conf.revIpRules.rule" />
       <ErrorsField />
       <SubmitField />
     </AutoForm>
-  ))
-  .add('compare plain autoform with mock data', () => (
-    <AutoForm
-      grid={3}
-      schema={schema}
-      onSubmit={action('submitted')}
-      model={mock_bucket_1}
-    />
   ))
 ;
