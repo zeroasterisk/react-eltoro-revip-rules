@@ -1,10 +1,10 @@
 {
   "name": "ui-eltoro-revip-rules",
-  "version": "0.0.0",
-  "description": "Ui Eltoro Revip Rules Component",
+  "version": "0.0.1",
+  "description": "UI ElToro Revip Rules Component",
   "repository": {
     "type": "git",
-    "url": "https://github.com/you/repo.git"
+    "url": "https://github.com/zeroasterisk/react-eltoro-revip-rules.git"
   },
   "license": "MIT",
   "scripts": {
@@ -50,13 +50,13 @@
     "style-loader": "^0.13.1"
   },
   "peerDependencies": {
-    "react": "^0.14.7 || ^15.0.0"
-  },
-  "dependencies": {
-    "babel-runtime": "^6.5.0",
+    "react": "^0.14.7 || ^15.0.0",
     "react-number-editor": "^4.0.2",
     "uniforms": "^1.19.1",
     "uniforms-bootstrap4": "^1.19.1"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.5.0"
   },
   "main": "dist/index.js",
   "engines": {
