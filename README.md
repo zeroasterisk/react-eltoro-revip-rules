@@ -12,7 +12,8 @@ This is a [Uniforms](https://github.com/vazco/uniforms/) React Component.
 
 ### Demo
 
-See a demo at ....
+See a demo at
+https://zeroasterisk.github.io/react-eltoro-revip-rules
 
 Run yourself by:
 
