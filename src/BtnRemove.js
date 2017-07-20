@@ -2,6 +2,7 @@
  * TODO split this into a HOC and a UI component
  * at which point, the block could dim, when waiting on confirmation for a better UI
  */
+import PropTypes from 'prop-types';
 import React from 'react';
 
 export default class BtnRemove extends React.Component {
@@ -47,3 +48,9 @@ export default class BtnRemove extends React.Component {
     );
   }
 }
+BtnRemove.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
+};
+BtnRemove.defaultProps = {
+};

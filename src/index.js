@@ -1,65 +1,36 @@
 import classnames from 'classnames';
 import isArray from 'lodash/isArray';
+import PropTypes from 'prop-types';
 import React, {Children} from 'react';
 import connectField from 'uniforms/connectField';
 import joinName     from 'uniforms/joinName';
 import NestField from 'uniforms-bootstrap4/NestField';
 import AutoField from 'uniforms-bootstrap4/AutoField';
 import TextField from 'uniforms-bootstrap4/TextField';
-import SelectField from 'uniforms-bootstrap4/SelectField';
 import NumField from 'uniforms-bootstrap4/NumField';
 
 import HOCToggleable from './HOCToggleable';
+import SelectUseRegex from './SelectUseRegex';
+import NumberPicker from './NumberPicker';
+import BtnAdd from './BtnAdd';
 import BtnRemove from './BtnRemove';
 
 import IconAnd from './IconAnd';
 import IconOr from './IconOr';
 
-const BtnsAdd = ({ showAnd, showOr, value, onChange }) => (
-  <div className="btn-group btn-group-sm">
-    <button
-      className="btn btn-secondary"
-      onClick={() => onChange(value.concat([{ term: '', use: 'term' }]))}
-    >
-      <i className="fa fa-plus fa-fw text-default" />{' '}
-      Add Term/URL
-    </button>
-    {showOr && (
-      <button
-        className="btn btn-secondary"
-        onClick={() => onChange(value.concat([{ or: [] }]))}
-      >
-        <i className="fa fa-plus fa-fw text-info" />{' '}
-        Add Nested Optional Set (match any one in set)
-      </button>
-    )}
-    {showAnd && (
-      <button
-        className="btn btn-secondary"
-        onClick={() => onChange(value.concat([{ and: [] }]))}
-      >
-        <i className="fa fa-plus fa-fw text-primary" />{' '}
-        Add Nested Required Set (match everyone in set)
-      </button>
-    )}
-  </div>
-);
-BtnsAdd.defaultProps = {
-  showAnd: true,
-  showOr: true,
-};
 const CardControl = ({ on, toggle }) => (
-  <button className="btn btn-sm btn-link" onClick={toggle}>
+  <btn className="btn btn-sm btn-link" onClick={toggle}>
     <i className={classnames('fa fa-fw', { 'fa-caret-up': on, 'fa-caret-down': !on })} />
-  </button>
+  </btn>
 );
 const Empty = ({ children }) => <em className="text-muted" style={{ opacity: 0.6 }}>{children}</em>;
+
 const OrTitle = ({ small }) => (
   small ? (
     <div className="text-muted">
       <IconOr style={{ height: 18, width: 18, marginBottom: 4 }} />
       {' '}
-      <em>Match <strong>Any One</strong> of The Following</em>
+      <em>Match <strong>Any One</strong></em>
     </div>
   ) : (
     <div>
@@ -84,16 +55,34 @@ const AndTitle = ({ small }) => (
     </div>
   )
 );
+const NoneTitle = ({ small }) => (
+  small ? (
+    <div className="text-muted">
+      <i className="fa fa-fw fa-ban" />
+      {' '}
+      <em>Exclude <strong>Each</strong></em>
+    </div>
+  ) : (
+    <div>
+      <i className="fa fa-fw fa-ban" />
+      {' '}
+      <em>Exclude <strong>Each</strong> of The Following</em>
+    </div>
+  )
+);
 
 
 const NodeView = ({ name, value, className, ...props }) => {
   if (!value) return null;
-  if (value.or) {
+  if (value.or ||value.and || value.none) {
+    const valueSet = (value.or ||value.and || value.none || []);
     return (
       <div className={classnames('small', className)}>
-        <OrTitle small />
+        {value.or && <OrTitle small />}
+        {value.and && <AndTitle small />}
+        {value.none && <NoneTitle small />}
         <div className="pl-4">
-          {value.or.map && value.or.map((item, index) => (
+          {valueSet.map && valueSet.map((item, index) => (
             <NodeView
               key={index}
               value={item}
@@ -105,24 +94,7 @@ const NodeView = ({ name, value, className, ...props }) => {
       </div>
     );
   }
-  if (value.and) {
-    return (
-      <div className={classnames('small', className)}>
-        <AndTitle small />
-        <div className="pl-4">
-          {value.and.map && value.and.map((item, index) => (
-            <NodeView
-              key={index}
-              value={item}
-              name={joinName(name, index)}
-              className={className}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (value.use === 'regex') {
+  if (value.useRegex) {
     return (
       <div className={classnames('small text-muted', className)}>
         <i className="fa fa-fw fa-search" />
@@ -137,132 +109,148 @@ const NodeView = ({ name, value, className, ...props }) => {
     </div>
   );
 };
-const NodeSetOr = HOCToggleable(({ name, value, itemProps, parent, onChange, findValue, ...props }) => (
-  <div className="card card-outline-info mb-2">
-    <div className="card-header">
-      <div className="d-flex justify-content-start">
-        <OrTitle />
-        <span className="ml-auto">
-          {props.on && (
-            <BtnRemove
-              name={name}
-              value={value}
-              name={parent.name}
-              findValue={findValue}
-              onChange={onChange}
+const NodeSetOr = HOCToggleable(({ name, itemProps, parent, onChange, findValue, ...props }) => {
+  const value = isArray(props.value) ? props.value : [];
+  return (
+    <div className="card card-outline-info mb-2">
+      <div className="card-header">
+        <div className="d-flex justify-content-start">
+          <OrTitle />
+          <span className="ml-auto">
+            {props.on && (
+              <BtnRemove
+                name={name}
+                value={value}
+                name={parent.name}
+                findValue={findValue}
+                onChange={onChange}
+              />
+            )}
+            <CardControl {...props} />
+          </span>
+        </div>
+      </div>
+      {props.on && (
+        <div className="card-block">
+          {isArray(value) && value.length === 0 && (<Empty>No URLs</Empty>)}
+          {isArray(value) && value.length > 0 && value.map((item, index) => (
+            <NodeAutoField
+              key={index}
+              name={joinName(name, index)}
+              on
+              {...itemProps}
+              className="card-outline-info"
             />
-          )}
-          <CardControl {...props} />
-        </span>
-      </div>
-    </div>
-    {props.on && (
-      <div className="card-block">
-        {value.map && value.length === 0 && (<Empty>No URLs</Empty>)}
-        {value.map && value.length > 0 && value.map((item, index) => (
-          <NodeAutoField
-            key={index}
-            name={joinName(name, index)}
-            on
-            {...itemProps}
-            className="card-outline-info"
-          />
-        ))}
-        <div className="text-right mt-2">
-          <BtnsAdd name={name} value={value} {...props} showAnd={false} />
+          ))}
+          <div className="text-right mt-2">
+            <BtnAdd name={name} value={value} onChange={onChange} showAnd={false} />
+          </div>
         </div>
-      </div>
-    )}
-    {!props.on && (
-      <div className="card-block">
-        {value.map && value.length === 0 && (<Empty>No URLs</Empty>)}
-        {value.map && value.length > 0 && value.map((item, index) => (
-          <NodeView
-            key={index}
-            value={item}
-            name={joinName(name, index)}
-            className="card-outline-info"
-          />
-        ))}
-      </div>
-    )}
-  </div>
-));
+      )}
+      {!props.on && (
+        <div className="card-block">
+          {isArray(value) && value.length === 0 && (<Empty>No URLs</Empty>)}
+          {isArray(value) && value.length > 0 && value.map((item, index) => (
+            <NodeView
+              key={index}
+              value={item}
+              name={joinName(name, index)}
+              className="card-outline-info"
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
 
-const NodeSetAnd = HOCToggleable(({ name, value, itemProps, ...props }) => (
-  <div className="card card-outline-default mb-2">
-    <div className="card-header">
-      <div className="d-flex justify-content-start">
-        <AndTitle />
-        <span className="ml-auto"><CardControl {...props} /></span>
-      </div>
-    </div>
-    {props.on && (
-      <div className="card-block">
-        {value.map && value.length === 0 && (<Empty>No URLs</Empty>)}
-        {value.map && value.length > 0 && value.map((item, index) => (
-          <NodeAutoField
-            key={index}
-            name={joinName(name, index)}
-            on
-            {...itemProps}
-          />
-        ))}
-        <div className="text-right mt-2">
-          <BtnsAdd name={name} value={value} {...props} showAnd={false} />
+const NodeSetAnd = HOCToggleable(({ name, itemProps, parent, onChange, findValue, ...props }) => {
+  const value = isArray(props.value) ? props.value : [];
+  return (
+    <div className="card card-outline-default mb-2">
+      <div className="card-header">
+        <div className="d-flex justify-content-start">
+          <AndTitle />
+          <span className="ml-auto">
+            {props.on && (
+              <BtnRemove
+                name={name}
+                value={value}
+                name={parent.name}
+                findValue={findValue}
+                onChange={onChange}
+              />
+            )}
+            <CardControl {...props} />
+          </span>
         </div>
       </div>
-    )}
-    {!props.on && (
-      <div className="card-block">
-        {value.map && value.length === 0 && (<Empty>No URLs</Empty>)}
-        {value.map && value.length > 0 && value.map((item, index) => (
-          <NodeView
-            key={index}
-            value={item}
-            name={joinName(name, index)}
-          />
-        ))}
-      </div>
-    )}
-  </div>
-));
-const NodeSetNot = HOCToggleable(({ name, findValue, itemProps, ...props }) => {
-  const orName = joinName(name, 'or');
-  const orValue = findValue(orName);
+      {props.on && (
+        <div className="card-block">
+          {isArray(value) && value.length === 0 && (<Empty>No URLs</Empty>)}
+          {isArray(value) && value.length > 0 && value.map((item, index) => (
+            <NodeAutoField
+              key={index}
+              name={joinName(name, index)}
+              on
+              {...itemProps}
+            />
+          ))}
+          <div className="text-right mt-2">
+            <BtnAdd name={name} value={value} onChange={onChange} showAnd={false} />
+          </div>
+        </div>
+      )}
+      {!props.on && (
+        <div className="card-block">
+          {isArray(value) && value.length === 0 && (<Empty>No URLs</Empty>)}
+          {isArray(value) && value.length > 0 && value.map((item, index) => (
+            <NodeView
+              key={index}
+              value={item}
+              name={joinName(name, index)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+const NodeSetNone = HOCToggleable(({ name, itemProps, parent, onChange, findValue, ...props }) => {
+  const value = isArray(props.value) ? props.value : [];
   return (
     <div className="card card-outline-warning mb-2">
       <div className="card-header">
         <div className="d-flex justify-content-start">
-          <em>Exclude <strong>Each</strong> of The Following</em>
+          <NoneTitle />
           <span className="ml-auto"><CardControl {...props} /></span>
         </div>
       </div>
       {props.on && (
         <div className="card-block">
-          {orValue.map && orValue.length === 0 && (<Empty>No Exclusions</Empty>)}
-          {orValue.map && orValue.length > 0 && orValue.map((item, index) => (
+          {isArray(value) && value.length === 0 && (<Empty>No Exclusions</Empty>)}
+          {isArray(value) && value.length > 0 && value.map((item, index) => (
             <NodeAutoField
               key={index}
-              name={joinName(orName, index)}
+              name={joinName(name, index)}
               on
               {...itemProps}
               className="card-outline-warning"
             />
           ))}
           <div className="text-right mt-2">
-            <BtnsAdd name={name} value={value} {...props} showAnd={false} />
+            <BtnAdd name={name} value={value} onChange={onChange} showOr={false} />
           </div>
         </div>
       )}
       {!props.on && (
         <div className="card-block">
-          {orValue.map && orValue.length === 0 && (<Empty>No Exclusions</Empty>)}
-          {orValue.map && orValue.length > 0 && orValue.map((item, index) => (
+          {isArray(value) && value.length === 0 && (<Empty>No Exclusions</Empty>)}
+          {isArray(value) && value.length > 0 && value.map((item, index) => (
             <NodeView
               key={index}
               value={item}
-              name={joinName(orName, index)}
+              name={joinName(name, index)}
             />
           ))}
         </div>
@@ -287,14 +275,19 @@ const NodeBasic = ({ name, value, findValue, onChange, parent, className, on }) 
       on={on}
     />
   }
-  const useFld = findValue(joinName(name, 'use'))
-    || (findValue(joinName(name, 'regex')) && 'regex')
-    || 'term';
+  if (value && value.none) {
+    return <NodeAutoField
+      name={joinName(name, 'none')}
+      className={className}
+      on={on}
+    />
+  }
+  const useRegex = findValue(joinName(name, 'useRegex'));
   return (
     <div className={classnames('card mb-2', className)}>
       <div className="card-block">
         <div className="small d-flex justify-content-start" style={{ marginTop: -10 }}>
-          <code className="pb-0">{name}</code>
+          <code className="pb-0">{name.replace(/conf\..*\.and/, 'rules.and')}</code>
           <div className="ml-auto">
             <BtnRemove
               value={value}
@@ -306,27 +299,27 @@ const NodeBasic = ({ name, value, findValue, onChange, parent, className, on }) 
         </div>
         <div className="row">
           <div className="col-2">
-            <SelectField label={false} grid={false}
-              name={joinName(name, 'use')}
-              options={{ term: 'Term/URL', regex: 'Regex' }}
-              value={useFld}
+            <SelectUseRegex
+              name={joinName(name, 'useRegex')}
+              value={useRegex}
             />
           </div>
           <div className="col-10">
-            {useFld === 'term' && (
+            {!useRegex && (
               <TextField label={false} grid={false} name={joinName(name, 'term')} />
             )}
-            {useFld === 'regex' && (
+            {useRegex && (
               <TextField label={false} grid={false} name={joinName(name, 'regex')} />
             )}
           </div>
         </div>
         <div className="row">
-          <div className="col-4">
-            <NumField grid={6} label="Max" name={joinName(name, 'max')} />
-          </div>
-          <div className="col-4">
-            <NumField grid={6} label="Min" name={joinName(name, 'min')} />
+          <div className="col-2"></div>
+          <div className="col-10 form-inline">
+            <label className="mr-sm-2">Max</label>
+            <NumberPicker name={joinName(name, 'max')} />
+            <label className="ml-sm-2 mr-sm-2">Min</label>
+            <NumberPicker name={joinName(name, 'min')} />
           </div>
         </div>
       </div>
@@ -341,14 +334,16 @@ NodeBasic.defaultProps = {
 
 const isLastNumber = (last) => !isNaN(parseInt(last, 10));
 const defaultForLast = last => {
-  if (last === 'not') return { or: [] };
+  if (last === 'none') return [];
   if (last === 'or') return [];
   if (last === 'and') return [];
   return null;
 }
 const isNameValid = (name) => {
-  if (/not\./.test(name) && !/not\.or/.test(name)) return false;
-  if (/not\..*not\./.test(name)) return false;
+  if (/none\..*none\./.test(name)) {
+    console.error('invalid name, should not nest none', name);
+    return false;
+  }
   return true;
 }
 const determineComponentFromProps = props => {
@@ -364,19 +359,14 @@ const determineComponentFromProps = props => {
   if (!current && current !== 0) return null;
 
   // handle sets
-  if (last === 'or' && !isArray(current)) {
-    console.error('OR is not array', name, last, current);
-    return null;
-  }
-  if (last === 'and' && !isArray(current)) {
-    console.error('AND is not array', name, last, current);
+  if (['or', 'and', 'none'].indexOf(last) !== -1 && !isArray(current)) {
+    console.error(last, 'is not array', name, last, current);
     return null;
   }
 
-  console.log('determineComponentFromProps', props, last, current);
   if (last === 'or') return NodeSetOr;
   if (last === 'and') return NodeSetAnd;
-  if (last === 'not') return NodeSetNot;
+  if (last === 'none') return NodeSetNone;
   // // handle nested `or` node
   // if (current && current.or && isArray(current.or)) return NodeSet;
   // // handle nested `and` node
@@ -404,13 +394,12 @@ const NodeAutoField = connectField(NodeAuto, {
 const RevIpRules = ({ name, ...props }) => (
   <NestField className="form form-horizontal" name={name} label={false}>
     <NodeAutoField name="and" />
-    <NodeAutoField name="not" />
   </NestField>
 );
 
 
 RevIpRules.propTypes = {
-  children: React.PropTypes.string.isRequired,
+  children: React.PropTypes.string,
   onClick: React.PropTypes.func,
   style: React.PropTypes.object,
 };

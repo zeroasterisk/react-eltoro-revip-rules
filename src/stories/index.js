@@ -1,6 +1,8 @@
 import React from 'react';
 import { storiesOf, action } from '@storybook/react';
 import AutoForm from 'uniforms-bootstrap4/AutoForm';
+import ErrorsField from 'uniforms-bootstrap4/ErrorsField';
+import SubmitField from 'uniforms-bootstrap4/SubmitField';
 
 import RevIpRules from '../index';
 
@@ -11,7 +13,7 @@ import RevIpRulesCustom from '../custom';
 import schema from './schema';
 
 
-const mock_bucket = {
+const mock_bucket_1 = {
   name: 'mock bucket',
   conf: {
     revIpRules: {
@@ -25,48 +27,53 @@ const mock_bucket = {
               { term: 'http://example.com/one_of_a/alt' },
               { term: 'http://example.com/one_of_a/other' },
             ] },
-            { use: 'regex', regex: 'examples?\.com' },
+            { useRegex: true, regex: 'examples?\.com' },
           ] },
-        ],
-        not: {
-          or: [
+          { none: [
             { term: 'http://example.com/exclude1' },
             { term: 'http://example.com/exclude2*suffix' },
-          ],
-        },
+            { and: [
+              { term: 'http://example.com/exclude-if-both-a' },
+              { term: 'http://example.com/exclude-if-both-b' },
+            ] },
+          ] },
+        ],
       },
     },
   },
 };
 
 storiesOf('RevIpRules', module)
-  .add('custom UI (nonfunctional)', () => (
-    <div className="container">
-      <RevIpRulesCustom
-        data={mock_bucket.conf.revIpRules.rule}
-        onChange={ action('RevIpRules changed') }
-      />
-    </div>
-  ))
-  .add('plain autoform', () => (
+  .add('mock data', () => (
     <AutoForm
       grid={3}
       schema={schema}
       onSubmit={action('submitted')}
-      model={mock_bucket}
-    />
-  ))
-  .add('RevIpRules autoform', () => (
-    <AutoForm
-      grid={3}
-      schema={schema}
-      onSubmit={action('submitted')}
-      model={mock_bucket}
+      model={mock_bucket_1}
     >
       <RevIpRules name="conf.revIpRules.rule" />
+      <ErrorsField />
+      <SubmitField />
     </AutoForm>
   ))
-  .add('default view', () => (
-    <RevIpRules onChange={ action('RevIpRules changed') } />
+  .add('no data', () => (
+    <AutoForm
+      grid={3}
+      schema={schema}
+      onSubmit={action('submitted')}
+      model={{}}
+    >
+      <RevIpRules name="conf.revIpRules.rule" />
+      <ErrorsField />
+      <SubmitField />
+    </AutoForm>
+  ))
+  .add('compare plain autoform with mock data', () => (
+    <AutoForm
+      grid={3}
+      schema={schema}
+      onSubmit={action('submitted')}
+      model={mock_bucket_1}
+    />
   ))
 ;

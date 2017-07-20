@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "babel-runtime": "^6.5.0",
+    "react-number-editor": "^4.0.2",
     "uniforms": "^1.19.1",
     "uniforms-bootstrap4": "^1.19.1"
   },

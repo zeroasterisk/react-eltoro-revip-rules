@@ -14,6 +14,7 @@ const schemaAST = buildASTSchema(schemaGraphQl).getType('Bucket');
 
 // build settings and details for supported fields
 const schemaRuleData = {
+  useRegex: { label: 'UI Control' },
   term: {label: 'Term'},
   regex: {label: 'Regex'},
   max: {label: 'max'},
@@ -21,7 +22,7 @@ const schemaRuleData = {
   // sets
   and: {label: 'and'},
   or: {label: 'or'},
-  not: {label: 'not'},
+  none: {label: 'not any'}, // equivalient to not.or
 };
 
 // handle nested nodes
@@ -31,9 +32,10 @@ const assignRulePrefix = (prefix, i) => {
     schemaRuleData[newKey] = schemaRuleData[key];
   });
 };
-['and', 'or'].forEach(assignRulePrefix);
-['and', 'or'].forEach(assignRulePrefix);
-['and', 'or'].forEach(assignRulePrefix);
+['and', 'or', 'none'].forEach(assignRulePrefix);
+['and', 'or', 'none'].forEach(assignRulePrefix);
+['and', 'or', 'none'].forEach(assignRulePrefix);
+['and', 'or', 'none'].forEach(assignRulePrefix);
 
 const schemaData = {
   name: { label: 'Name' },
@@ -41,8 +43,7 @@ const schemaData = {
   'conf.revIpRules': { label: 'Conf for Rev IP' },
   'conf.revIpRules.rule': { label: 'Rules for Rev IP' },
   'conf.revIpRules.rule.and': { label: 'Rules Include' },
-  'conf.revIpRules.rule.not': { label: 'Rules Exclude' },
-  'conf.revIpRules.rule.not.or': { label: 'Rules Exclude Any of These' },
+  'conf.revIpRules.rule.none': { label: 'Rules Exclude Any of These' },
 };
 const assignPrefix = (prefix, i) => {
   Object.keys(schemaRuleData).forEach((key, j) => {
@@ -50,7 +51,7 @@ const assignPrefix = (prefix, i) => {
     schemaData[newKey] = schemaRuleData[key];
   });
 };
-['conf.revIpRules.rule.and', 'conf.revIpRules.rule.not.or'].forEach(assignPrefix);
+['conf.revIpRules.rule.and', 'conf.revIpRules.rule.none'].forEach(assignPrefix);
 console.log(schemaData);
 
 

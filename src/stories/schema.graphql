@@ -1,18 +1,16 @@
 type RuleNode {
-    use:    String
+    useRegex: Boolean
     term:   String
     regex:  String
     max:    Int
     min:    Int
     and:    [RuleNode]
     or:     [RuleNode]
-}
-type RuleNotRoot {
-    or:    [RuleNode]
+    none:   [RuleNode]
 }
 type RuleRoot {
     and:    [RuleNode]
-    not:    RuleNotRoot
+    none:   [RuleNode]
 }
 type BucketConfRev {
     rule: RuleRoot
