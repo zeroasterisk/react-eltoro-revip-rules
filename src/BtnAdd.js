@@ -2,7 +2,7 @@ import isArray from 'lodash/isArray';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const BtnAdd = ({ showAnd, showOr, value, onChange }) => (isArray(value) && (
+const BtnAdd = ({ showAnd, showOr, showNone, value, onChange }) => (isArray(value) && (
   <div className="btn-group btn-group-sm">
     <btn
       className="btn btn-secondary"
@@ -31,17 +31,28 @@ const BtnAdd = ({ showAnd, showOr, value, onChange }) => (isArray(value) && (
         Add Nested Required Set (match everyone in set)
       </btn>
     )}
+    {showNone && (
+      <btn
+        className="btn btn-secondary"
+        onClick={() => onChange(value.concat([{ none: [] }]))}
+      >
+        <i className="fa fa-plus fa-fw text-danger" />{' '}
+        Add Exclusion Set (exclude ANY of the following)
+      </btn>
+    )}
   </div>
 ));
 BtnAdd.propTypes = {
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.array.isRequired,
+  value: PropTypes.arrayOf(PropTypes.object).isRequired,
   showAnd: PropTypes.bool,
   showOr: PropTypes.bool,
+  showNone: PropTypes.bool,
 };
 BtnAdd.defaultProps = {
   value: [],
   showAnd: true,
   showOr: true,
+  showNone: false,
 };
 export default BtnAdd;

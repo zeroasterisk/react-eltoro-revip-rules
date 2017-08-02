@@ -28,13 +28,13 @@ const Empty = ({ children }) => <em className="text-muted" style={{ opacity: 0.6
 const OrTitle = ({ small }) => (
   small ? (
     <div className="text-muted">
-      <IconOr style={{ height: 18, width: 18, marginBottom: 4 }} />
+      <IconOr style={{ height: 18, width: 18, marginBottom: 4 }}  className="text-success" />
       {' '}
       <em>Match <strong>Any One</strong></em>
     </div>
   ) : (
     <div>
-      <IconOr style={{ height: 24, width: 24, marginBottom: 4 }} />
+      <IconOr style={{ height: 24, width: 24, marginBottom: 4 }}  className="text-success"/>
       {' '}
       <em>Match <strong>Any One</strong> of The Following</em>
     </div>
@@ -43,13 +43,13 @@ const OrTitle = ({ small }) => (
 const AndTitle = ({ small }) => (
   small ? (
     <div className="text-muted">
-      <IconAnd style={{ height: 18, width: 18 }} />
+      <IconAnd style={{ height: 18, width: 18 }} className="text-info" />
       {' '}
       <em>Match <strong>All</strong></em>
     </div>
   ) : (
     <div>
-      <IconAnd style={{ height: 24, width: 24, marginBottom: 4 }} />
+      <IconAnd style={{ height: 24, width: 24, marginBottom: 4 }} className="text-info" />
       {' '}
       <em>Match <strong>All</strong> of The Following</em>
     </div>
@@ -58,13 +58,13 @@ const AndTitle = ({ small }) => (
 const NoneTitle = ({ small }) => (
   small ? (
     <div className="text-muted">
-      <i className="fa fa-fw fa-ban" />
+      <i className="fa fa-fw fa-ban text-danger" />
       {' '}
       <em>Exclude <strong>Each</strong></em>
     </div>
   ) : (
     <div>
-      <i className="fa fa-fw fa-ban" />
+      <i className="fa fa-fw fa-ban text-danger" />
       {' '}
       <em>Exclude <strong>Each</strong> of The Following</em>
     </div>
@@ -112,7 +112,7 @@ const NodeView = ({ name, value, className, ...props }) => {
 const NodeSetOr = HOCToggleable(({ name, itemProps, parent, onChange, findValue, ...props }) => {
   const value = isArray(props.value) ? props.value : [];
   return (
-    <div className="card card-outline-info mb-2">
+    <div className="card card-outline-success mb-2">
       <div className="card-header">
         <div className="d-flex justify-content-start">
           <OrTitle />
@@ -139,7 +139,7 @@ const NodeSetOr = HOCToggleable(({ name, itemProps, parent, onChange, findValue,
               name={joinName(name, index)}
               on
               {...itemProps}
-              className="card-outline-info"
+              className="card-outline-success"
             />
           ))}
           <div className="text-right mt-2">
@@ -155,7 +155,7 @@ const NodeSetOr = HOCToggleable(({ name, itemProps, parent, onChange, findValue,
               key={index}
               value={item}
               name={joinName(name, index)}
-              className="card-outline-info"
+              className="card-outline-success"
             />
           ))}
         </div>
@@ -164,10 +164,16 @@ const NodeSetOr = HOCToggleable(({ name, itemProps, parent, onChange, findValue,
   );
 });
 
+const canAddNone = (name, value) => {
+  if (!/ruleSetAnd$/.test(name)) return false;
+  if (value.length === 0) return true;
+  if (value.filter(x => x && x.none).length === 0) return true;
+  return false;
+};
 const NodeSetAnd = HOCToggleable(({ name, itemProps, parent, onChange, findValue, ...props }) => {
   const value = isArray(props.value) ? props.value : [];
   return (
-    <div className="card card-outline-default mb-2">
+    <div className="card card-outline-info mb-2">
       <div className="card-header">
         <div className="d-flex justify-content-start">
           <AndTitle />
@@ -194,10 +200,17 @@ const NodeSetAnd = HOCToggleable(({ name, itemProps, parent, onChange, findValue
               name={joinName(name, index)}
               on
               {...itemProps}
+              className="card-outline-info"
             />
           ))}
           <div className="text-right mt-2">
-            <BtnAdd name={name} value={value} onChange={onChange} showAnd={false} />
+            <BtnAdd
+              name={name}
+              value={value}
+              onChange={onChange}
+              showAnd={false}
+              showNone={canAddNone(name, value)}
+            />
           </div>
         </div>
       )}
@@ -219,11 +232,22 @@ const NodeSetAnd = HOCToggleable(({ name, itemProps, parent, onChange, findValue
 const NodeSetNone = HOCToggleable(({ name, itemProps, parent, onChange, findValue, ...props }) => {
   const value = isArray(props.value) ? props.value : [];
   return (
-    <div className="card card-outline-warning mb-2">
+    <div className="card card-outline-danger mb-2">
       <div className="card-header">
         <div className="d-flex justify-content-start">
           <NoneTitle />
-          <span className="ml-auto"><CardControl {...props} /></span>
+          <span className="ml-auto">
+            {props.on && (
+              <BtnRemove
+                name={name}
+                value={value}
+                name={parent.name}
+                findValue={findValue}
+                onChange={onChange}
+              />
+            )}
+            <CardControl {...props} />
+          </span>
         </div>
       </div>
       {props.on && (
@@ -235,7 +259,7 @@ const NodeSetNone = HOCToggleable(({ name, itemProps, parent, onChange, findValu
               name={joinName(name, index)}
               on
               {...itemProps}
-              className="card-outline-warning"
+              className="card-outline-danger"
             />
           ))}
           <div className="text-right mt-2">
@@ -364,8 +388,9 @@ const determineComponentFromProps = props => {
     return null;
   }
 
-  if (last === 'or') return NodeSetOr;
+  if (last === 'ruleSetAnd') return NodeSetAnd;
   if (last === 'and') return NodeSetAnd;
+  if (last === 'or') return NodeSetOr;
   if (last === 'none') return NodeSetNone;
   // // handle nested `or` node
   // if (current && current.or && isArray(current.or)) return NodeSet;
@@ -390,11 +415,13 @@ const NodeAutoField = connectField(NodeAuto, {
   initialValue:   false
 });
 
-
+// --------------------------------
+// ACTUAL ROOT LEVEL ELEMENT
+//   - always an array, treated as an "and"
 const RevIpRules = ({ name, ...props }) => (
-  <NestField className="form form-horizontal" name={name} label={false}>
-    <NodeAutoField name="and" />
-  </NestField>
+  <div className="form form-horizontal">
+    <NodeAutoField name={name} label={false} />
+  </div>
 );
 
 

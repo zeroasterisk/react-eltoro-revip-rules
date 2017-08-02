@@ -41,9 +41,7 @@ const schemaData = {
   name: { label: 'Name' },
   conf: { label: 'Conf' },
   'conf.revIpRules': { label: 'Conf for Rev IP' },
-  'conf.revIpRules.rule': { label: 'Rules for Rev IP' },
-  'conf.revIpRules.rule.and': { label: 'Rules Include' },
-  'conf.revIpRules.rule.none': { label: 'Rules Exclude Any of These' },
+  'conf.revIpRules.ruleSetAnd': { label: 'Rules for Rev IP' },
 };
 const assignPrefix = (prefix, i) => {
   Object.keys(schemaRuleData).forEach((key, j) => {
@@ -51,7 +49,7 @@ const assignPrefix = (prefix, i) => {
     schemaData[newKey] = schemaRuleData[key];
   });
 };
-['conf.revIpRules.rule.and', 'conf.revIpRules.rule.none'].forEach(assignPrefix);
+['conf.revIpRules.ruleSetAnd'].forEach(assignPrefix);
 console.log(schemaData);
 
 

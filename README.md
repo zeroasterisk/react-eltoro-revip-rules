@@ -42,7 +42,7 @@ import RevIpRules from 'ui-eltoro-revip-rules';
 
 const MyComponent = () => (
   <AutoForm schema={schema} model={model} onSubmit={console.log}>
-    <RevIpRules name="conf.revIpRules.rule" />
+    <RevIpRules name="conf.revIpRules.ruleSetAnd" />
     <ErrorsField />
     <SubmitField />
   </AutoForm>
