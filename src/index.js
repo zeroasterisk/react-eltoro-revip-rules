@@ -10,7 +10,6 @@ import TextField from 'uniforms-bootstrap4/TextField';
 import NumField from 'uniforms-bootstrap4/NumField';
 
 import HOCToggleable from './HOCToggleable';
-import SelectUseRegex from './SelectUseRegex';
 import NumberPicker from './NumberPicker';
 import BtnAdd from './BtnAdd';
 import BtnRemove from './BtnRemove';
@@ -94,7 +93,7 @@ const NodeView = ({ name, value, className, ...props }) => {
       </div>
     );
   }
-  if (value.useRegex) {
+  if (isNodeRegex(value)) {
     return (
       <div className={classnames('small text-muted', className)}>
         <i className="fa fa-fw fa-search" />
@@ -283,6 +282,7 @@ const NodeSetNone = HOCToggleable(({ name, itemProps, parent, onChange, findValu
   );
 });
 
+const isNodeRegex = ({ term, regex }) => regex && regex.length;
 
 const NodeBasic = ({ name, value, findValue, onChange, parent, className, on }) => {
   if (value && value.or) {
@@ -306,7 +306,7 @@ const NodeBasic = ({ name, value, findValue, onChange, parent, className, on }) 
       on={on}
     />
   }
-  const useRegex = findValue(joinName(name, 'useRegex'));
+  const useRegex = isNodeRegex(value);
   return (
     <div className={classnames('card mb-2', className)}>
       <div className="card-block">
@@ -323,17 +323,47 @@ const NodeBasic = ({ name, value, findValue, onChange, parent, className, on }) 
         </div>
         <div className="row">
           <div className="col-2">
-            <SelectUseRegex
-              name={joinName(name, 'useRegex')}
-              value={useRegex}
-            />
+            {useRegex && (
+              <label className="col-form-label">
+                <i className="fa fa-fw fa-search" />
+                Regex
+                <btn
+                  className="btn btn-link btn-sm py-0 mt-0 mb-1"
+                  style={{ opacity: 0.6 }}
+                  onClick={() => {
+                    const regex = findValue(joinName(name, 'regex'));
+                    onChange(regex, joinName(name, 'term'));
+                    onChange(null, joinName(name, 'regex'));
+                  }}
+                >
+                  <i className="fa fa-fw fa-link" />
+                </btn>
+              </label>
+            )}
+            {!useRegex && (
+              <label className="col-form-label">
+                <i className="fa fa-fw fa-link" />
+                Term
+                <btn
+                  className="btn btn-link btn-sm py-0 mt-0 mb-1"
+                  style={{ opacity: 0.6 }}
+                  onClick={() => {
+                    const term = findValue(joinName(name, 'term'));
+                    onChange(term, joinName(name, 'regex'));
+                    onChange(null, joinName(name, 'term'));
+                  }}
+                >
+                  <i className="fa fa-fw fa-link" />
+                </btn>
+              </label>
+            )}
           </div>
           <div className="col-10">
-            {!useRegex && (
-              <TextField label={false} grid={false} name={joinName(name, 'term')} />
-            )}
             {useRegex && (
               <TextField label={false} grid={false} name={joinName(name, 'regex')} />
+            )}
+            {!useRegex && (
+              <TextField label={false} grid={false} name={joinName(name, 'term')} />
             )}
           </div>
         </div>

@@ -1,6 +1,6 @@
 {
   "name": "ui-eltoro-revip-rules",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "UI ElToro Revip Rules Component",
   "repository": {
     "type": "git",
@@ -50,6 +50,9 @@
     "style-loader": "^0.13.1"
   },
   "peerDependencies": {
+    "lodash": "^4.17.0",
+    "prop-types": "^15.5.0",
+    "classnames": "^1.2.0",
     "react": "^0.14.7 || ^15.0.0",
     "react-number-editor": "^4.0.2",
     "uniforms": "^1.19.1",

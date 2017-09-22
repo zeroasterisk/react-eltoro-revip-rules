@@ -27,7 +27,7 @@ const NumberPicker = ({ name, value, onChange, style, className }) => {
       step={1}
       decimals={0}
       value={val}
-      onValueChange={onChange}
+      onValueChange={(num) => onChange(cleanInputValue(num))}
       style={style}
       className={className}
     />

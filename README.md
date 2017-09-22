@@ -28,7 +28,7 @@ Then see it at http://localhost:9010/
 
 ```
 # install peer dependancies
-npm i --save uniforms uniforms-bootstrap4 react-number-editor lodash
+npm i --save react prop-types uniforms uniforms-bootstrap4 react-number-editor lodash classnames
 # install package
 npm i --save ui-eltoro-revip-rules
 ```
@@ -50,6 +50,15 @@ const MyComponent = () => (
 ```
 
 For more information on usage, see [stories](./src/stories/index.js)
+
+### History / Changelog
+
+#### 0.0.3 Term/Regex only, max/min as Numbers
+- no longer store `useRegex` - now just switch `term` and `regex` values (clear other, to `null`)
+- now verifying that `max` and `min` values are numbers (including `0`)
+
+#### 0.0.2 Minor Cleanup
+#### 0.0.1 Initial Release
 
 ### TODO - Extend - Abstract Nesting
 

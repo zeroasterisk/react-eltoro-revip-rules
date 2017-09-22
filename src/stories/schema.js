@@ -14,7 +14,6 @@ const schemaAST = buildASTSchema(schemaGraphQl).getType('Bucket');
 
 // build settings and details for supported fields
 const schemaRuleData = {
-  useRegex: { label: 'UI Control' },
   term: {label: 'Term'},
   regex: {label: 'Regex'},
   max: {label: 'max'},

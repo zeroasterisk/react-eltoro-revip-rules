@@ -26,7 +26,7 @@ const mock_bucket_1 = {
             { term: 'http://example.com/one_of_a/alt' },
             { term: 'http://example.com/one_of_a/other' },
           ] },
-          { useRegex: true, regex: 'examples?\.com' },
+          { regex: 'examples?\.com' },
         ] },
         { none: [
           { term: 'http://example.com/exclude1' },
@@ -47,7 +47,7 @@ const mock_bucket_2 = {
       ruleSetAnd: [
         { or: [
           { term: 'http://example.com/one_of_a/maybe', max: 10, min: 1 },
-          { useRegex: true, regex: 'examples?\.com' },
+          { regex: 'examples?\.com' },
         ] },
       ],
     },
